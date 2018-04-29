@@ -12,8 +12,8 @@ import tempfile
 from argparse import ArgumentParser, ArgumentError
 
 
-RE_VIDEO_RES = r'Video:.* (\d+x\d+)[, ]'
-RE_VIDEO_FPS = r'Video:.* ([\d.]+) fps'
+RE_VIDEO_RES = r'Video:.*? (\d+x\d+)[, ]'
+RE_VIDEO_FPS = r'Video:.*? ([\d.]+) fps'
 
 VideoData = namedtuple('VideoData', ['path', 'width', 'height', 'fps'])
 
