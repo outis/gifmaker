@@ -106,6 +106,12 @@ def _extract_video_data(video):
     command = ["avprobe", video]
     proc = subprocess.Popen(command, stderr=subprocess.PIPE)
     output = proc.stderr.read()
+    try:
+        # output might be `bytes`
+        output = output.decode("utf-8")
+    except AttributeError:
+        # if `output.decode` doesn't exist, output should already be a `str`
+        pass
     width, height = re.search(RE_VIDEO_RES, output).group(1).split("x")
     fps = re.search(RE_VIDEO_FPS, output).group(1)
     data = VideoData(path=video, width=int(width), height=int(height),
