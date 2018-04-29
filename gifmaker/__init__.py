@@ -112,7 +112,9 @@ def _exec(*args):
         # if `output.decode` doesn't exist, output should already be a `str`
         return output
 
-def _extract_video_data(video):
+def _extract_video_data_old(video):
+    """Older regex-based method of getting video data.
+    """
     output = _exec("avprobe", video)
     width, height = RE_VIDEO_RES.search(output).group(1).split("x")
     fps = RE_VIDEO_FPS.search(output).group(1)
@@ -120,6 +122,27 @@ def _extract_video_data(video):
                      fps=round(float(fps)))
     return data
 
+def _extract_video_data(video):
+    output = _exec("avprobe", "-v", "quiet", "-of", "json", "-show_streams", video)
+    try:
+        streams = json.loads(output)['streams']
+    except json.decoder.JSONDecodeError:
+        # fallback
+        logging.info("Couldn't parse JSON output from avprobe; falling back to regexes.")
+        return _extract_video_data_old(video)
+    for stream in streams:
+        if 'video' == stream['codec_type']:
+            fps = stream['avg_frame_rate'].split('/', 2)
+            if len(fps) == 2:
+                fps = float(fps[0]) / float(fps[1])
+            else:
+                fps = float(fps)
+            return VideoData(
+                path=video,
+                width=int(stream['width']),
+                height=int(stream['height']),
+                fps=round(fps))
+    raise RuntimeError("Couldn't find video stream in %s" % video)
 
 def _extract_frames(video_data, output_dir, start=None, duration=None,
                     scale=None, crop=None):
