@@ -4,6 +4,7 @@ Created on Mar 30, 2014
 @author: ignacio
 '''
 from collections import namedtuple
+import json
 import logging
 import os
 import re
@@ -101,17 +102,18 @@ def _parse_args():
                                 % options.frameskip)
     return options
 
-
-def _extract_video_data(video):
-    command = ["avprobe", video]
-    proc = subprocess.Popen(command, stderr=subprocess.PIPE)
-    output = proc.stderr.read()
+def _exec(*args):
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    output = proc.stdout.read()
     try:
         # output might be `bytes`
-        output = output.decode("utf-8")
+        return output.decode("utf-8")
     except AttributeError:
         # if `output.decode` doesn't exist, output should already be a `str`
-        pass
+        return output
+
+def _extract_video_data(video):
+    output = _exec("avprobe", video)
     width, height = RE_VIDEO_RES.search(output).group(1).split("x")
     fps = RE_VIDEO_FPS.search(output).group(1)
     data = VideoData(path=video, width=int(width), height=int(height),
