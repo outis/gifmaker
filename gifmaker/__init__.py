@@ -41,6 +41,9 @@ def _get_arg_parser():
                         default=True, help='Do NOT optimize the resulting gif')
     parser.add_argument("-f", "--fuzz", type=int, default=None,
                         help='Fuzz percentage for gif creation. '
+                        "Between 2%% and 5%%, the quality isn't "
+                        'severely degraded and the output size '
+                        'will decrease dramatically. '
                         'Defaults to none')
     parser.add_argument("--crop", type=CropArea.from_arg, default=None,
                         help=("Rectangular area to crop from the input, "
