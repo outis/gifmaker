@@ -12,8 +12,8 @@ import tempfile
 from argparse import ArgumentParser, ArgumentError
 
 
-RE_VIDEO_RES = r'Video:.*? (\d+x\d+)[, ]'
-RE_VIDEO_FPS = r'Video:.*? ([\d.]+) fps'
+RE_VIDEO_RES = re.compile(r'Video:.*? (\d+x\d+)[, ]', re.MULTILINE|re.DOTALL)
+RE_VIDEO_FPS = re.compile(r'Video:.*? ([\d.]+) fps', re.MULTILINE|re.DOTALL)
 
 VideoData = namedtuple('VideoData', ['path', 'width', 'height', 'fps'])
 
@@ -112,8 +112,8 @@ def _extract_video_data(video):
     except AttributeError:
         # if `output.decode` doesn't exist, output should already be a `str`
         pass
-    width, height = re.search(RE_VIDEO_RES, output).group(1).split("x")
-    fps = re.search(RE_VIDEO_FPS, output).group(1)
+    width, height = RE_VIDEO_RES.search(output).group(1).split("x")
+    fps = RE_VIDEO_FPS.search(output).group(1)
     data = VideoData(path=video, width=int(width), height=int(height),
                      fps=round(float(fps)))
     return data
